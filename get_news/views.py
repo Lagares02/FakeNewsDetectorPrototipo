@@ -8,10 +8,10 @@ from datetime import datetime
 from .models import News
 import spacy
 import nltk
-nltk.download('wordnet')
-nltk.download('omw-1.4')
 from nltk.corpus import wordnet as wn
 from collections import defaultdict
+from .identifyModel.SVM import clf, vectorizer
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
     
@@ -158,31 +158,7 @@ def news(request):
         'http://portafolio.co/rss/tendencias/sociales',
         
             # Lujo
-        'http://portafolio.co/rss/tendencias/lujo',
-        
-        # Semana
-            # Economia y Negocios
-        'https://www.dinero.com/dinero/rss/rssdinero.xml',
-        
-        # Colombia.ladevi
-            # Actualidad
-        'https://colombia.ladevi.info/rss/actualidad.xml',
-            
-            # Empresas y Productos 
-        'https://colombia.ladevi.info/rss/empresas-productos.xml',
-        
-            # Opinion
-        'https://colombia.ladevi.info/rss/opinion.xml',
-        
-            # Tendencias
-        'https://colombia.ladevi.info/rss/tendencias.xml',
-        
-            # Entrevistas
-        'https://colombia.ladevi.info/rss/entrevistas.xml',
-        
-            # Agenda
-        'https://colombia.ladevi.info/rss/agenda.xml'
-        
+        'http://portafolio.co/rss/tendencias/lujo'
     ]
 
     i = 0
@@ -221,6 +197,7 @@ def news(request):
     return HttpResponse(f"Recibidos {i} artículos.")
 
 
+@csrf_exempt
 def valid_new(request):
      if request.method =="POST":
         # Carga del modelo en español
@@ -259,12 +236,13 @@ def valid_new(request):
         print("Palabras clave y sinónimos:")
         for palabra, sinonimos_palabra in sinonimos.items():
             print(f"{palabra}: {', '.join(sinonimos_palabra)}")
-
-        
-        
+            
+        # Resultado de clasificacion
+        texto_procesado = vectorizer.transform([texto])
+        resultado = clf.predict(texto_procesado)
+        print("\n", texto, "es un: ")
+        print(resultado)
+            
+                
         return HttpResponse("validar noticias")
-
-
-
-    
 
